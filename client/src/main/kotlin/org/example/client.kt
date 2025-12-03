@@ -10,13 +10,17 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import java.time.LocalTime
 import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicLong
 
 fun newOkHttpClient(): HttpClient {
     return HttpClient(OkHttp) {
@@ -74,25 +78,74 @@ class Api(
 
 fun main(args: Array<String>) {
     runBlocking {
-        val startedAt = System.currentTimeMillis()
-        clientTest()
-        logd("client test took ${System.currentTimeMillis() - startedAt}")
+        val executor = Executors.newSingleThreadExecutor()
+        println("Start CIO client test\n")
+        val cioTestResult = clientTest(
+            clientFactory = ::newCioClient,
+            dispatcherFactory = { executor.asCoroutineDispatcher() },
+        )
+
+        println("\n\n\nStart OkHttp client test\n")
+        val okHttpTestResult = clientTest(
+            clientFactory = ::newOkHttpClient,
+            dispatcherFactory = { executor.asCoroutineDispatcher() },
+        )
+
+        println("=================================")
+        println(cioTestResult.format("CIO"))
+        println(okHttpTestResult.format("OkHttp"))
+        executor.shutdownNow()
     }
 }
 
-private suspend fun clientTest() {
+private suspend fun clientTest(
+    clientFactory: () -> HttpClient,
+    dispatcherFactory: () -> CoroutineDispatcher,
+    taskCount: Int = 100,
+    endpointDelaySecs: Int = 1,
+): TestStats {
+    val minTime = AtomicLong(Long.MAX_VALUE)
+    val totalTime = AtomicLong()
+    val maxTime = AtomicLong()
+    val startedAt = System.currentTimeMillis()
+
     coroutineScope {
-        val dispatcher = Dispatchers.IO.limitedParallelism(1)
+        val dispatcher = dispatcherFactory()
         val api = Api(
             apiAddress = "http://localhost:8080",
-            httpClient = newOkHttpClient(),
+            httpClient = clientFactory(),
         )
-
-        repeat(100) {
+        repeat(taskCount) { num ->
+            val startedAt = System.currentTimeMillis()
             launch(dispatcher) {
-                api.getDatetime(delaySeconds = 5)
+                logd("task#$num started; took: ${System.currentTimeMillis() - startedAt}")
+                api.getDatetime(delaySeconds = endpointDelaySecs)
+                val taskDuration = System.currentTimeMillis() - startedAt
+                logd("task#$num finished; took: $taskDuration")
+                totalTime.addAndGet(taskDuration)
+                minTime.updateAndGet { if (it > taskDuration) taskDuration else it }
+                maxTime.updateAndGet { if (it < taskDuration) taskDuration else it }
             }
+            logd("task#$num enqueued")
         }
+    }
+    val testDuration = System.currentTimeMillis() - startedAt
+    logd("Client test took: $testDuration; min: ${minTime.get()}; max: ${maxTime.get()}; avg: ${totalTime.get() / taskCount}")
+    return TestStats(
+        testDuration = testDuration,
+        minTime = minTime.get(),
+        maxTime = maxTime.get(),
+        averageTime = totalTime.get() / taskCount
+    )
+}
 
+data class TestStats(
+    val testDuration: Long,
+    val minTime: Long,
+    val maxTime: Long,
+    val averageTime: Long,
+) {
+    fun format(name: String): String {
+        return "Test#$name duration: $testDuration; min: $minTime; max: $maxTime; avg: $averageTime;"
     }
 }
