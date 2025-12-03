@@ -8,6 +8,7 @@ import io.ktor.server.engine.EngineConnectorBuilder
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.jetty.jakarta.Jetty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.request.header
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.RoutingRoot
@@ -50,9 +51,13 @@ fun newServer(): EmbeddedServer<*, *> {
                     call.respondText("Hello, world!")
                 }
                 get("/datetime") {
-                    val delay = min(call.queryParameters["delay"]?.toIntOrNull() ?: 10, 60)
-                    delay(delay.seconds)
+                    val startAt = System.currentTimeMillis()
+                    val delay = call.queryParameters["delay"]?.toIntOrNull()
+                    val reqId = call.request.header("X-RequestId")
+                    println("Got request with id: $reqId and delay: $delay")
+                    delay((delay ?: 5).seconds)
                     call.respond(HttpStatusCode.OK, DateTime(), TypeInfo(DateTime::class, typeOf<DateTime>()))
+                    println("Request with id: $reqId finished; took: ${System.currentTimeMillis() - startAt}")
                 }
             }
         }

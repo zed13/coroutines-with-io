@@ -1,24 +1,22 @@
-package org.example.client
+@file:JvmName("Client")
 
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.get
-import io.ktor.client.request.parameter
-import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.CoroutineScope
+package org.example
+
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import org.example.DateTime
 import java.time.LocalTime
-import java.util.UUID
+import java.util.*
 
 fun newOkHttpClient(): HttpClient {
     return HttpClient(OkHttp) {
@@ -58,12 +56,15 @@ class Api(
         val reqId = UUID.randomUUID()
         val startedAt = System.currentTimeMillis()
         logd("Request(id: $reqId) started; delaySeconds: $delaySeconds")
-        val response = httpClient.get("$apiAddress/datetime") {
+        val endpoint = "$apiAddress/datetime"
+        logd("Request(id: $reqId) endpoint = $endpoint")
+        val response = httpClient.get(endpoint) {
             if (delaySeconds != null) {
                 parameter("delay", delaySeconds)
             }
+            headers { append("X-RequestId", reqId.toString()) }
         }
-        logd("Request(id: $reqId) finished; took ${System.currentTimeMillis() - startedAt}")
+        logd("Request(id: $reqId) finished; took ${System.currentTimeMillis() - startedAt}; status: ${response.status}")
         return when (response.status) {
             HttpStatusCode.OK -> response.body()
             else -> null
@@ -71,18 +72,27 @@ class Api(
     }
 }
 
-fun main() = runBlocking {
-    val api = Api(
-        apiAddress = "http://localhost:8080/",
-        httpClient = newCioClient(),
-    )
-
-    val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
-    repeat(100) {
-        scope.launch(Dispatchers.IO) {
-            api.getDatetime(delaySeconds = 5)
-        }
+fun main(args: Array<String>) {
+    runBlocking {
+        val startedAt = System.currentTimeMillis()
+        clientTest()
+        logd("client test took ${System.currentTimeMillis() - startedAt}")
     }
-    scope.coroutineContext[Job]?.join()
+}
+
+private suspend fun clientTest() {
+    coroutineScope {
+        val dispatcher = Dispatchers.IO.limitedParallelism(1)
+        val api = Api(
+            apiAddress = "http://localhost:8080",
+            httpClient = newOkHttpClient(),
+        )
+
+        repeat(100) {
+            launch(dispatcher) {
+                api.getDatetime(delaySeconds = 5)
+            }
+        }
+
+    }
 }
