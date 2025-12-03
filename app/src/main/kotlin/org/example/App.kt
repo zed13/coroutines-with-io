@@ -1,12 +1,7 @@
 package org.example
 
-class App {
-    val greeting: String
-        get() {
-            return "Hello World!"
-        }
+suspend fun main() {
+    newServer().startSuspend()
 }
 
-fun main() {
-    println(App().greeting)
-}
+
