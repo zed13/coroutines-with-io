@@ -9,9 +9,27 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
+import okhttp3.ConnectionPool
+import okhttp3.Dispatcher
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 fun newOkHttpClient(): HttpClient {
     return HttpClient(OkHttp) {
+        engine {
+            config {
+//                connectionPool(ConnectionPool(
+//                    maxIdleConnections = 100,
+//                    keepAliveDuration = 5,
+//                    timeUnit = TimeUnit.MINUTES,
+//                ))
+                dispatcher(Dispatcher(Executors.newCachedThreadPool()).apply {
+                    maxRequests = 100
+                    maxRequestsPerHost = 100
+                })
+            }
+        }
         install(ContentNegotiation) {
             json(newJsonConfiguration())
         }
@@ -41,13 +59,13 @@ fun main(args: Array<String>) {
         println("Start CIO client test\n")
         val cioTestResult = ParallelRequestTest(
             clientFactory = ::newCioClient,
-            dispatcherFactory = { Dispatchers.Default.limitedParallelism(1) },
+            dispatcherFactory = { Dispatchers.IO },
         )
 
         println("\n\n\nStart OkHttp client test\n")
         val okHttpTestResult = ParallelRequestTest(
             clientFactory = ::newOkHttpClient,
-            dispatcherFactory = { Dispatchers.IO },
+            dispatcherFactory = { Dispatchers.IO.limitedParallelism(2) },
         )
 
         println("\n=================================")
