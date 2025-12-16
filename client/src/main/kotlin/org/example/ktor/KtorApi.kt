@@ -1,4 +1,4 @@
-package org.example
+package org.example.ktor
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -6,9 +6,11 @@ import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.parameter
 import io.ktor.http.HttpStatusCode
+import org.example.DateTime
+import org.example.log
 import java.util.UUID
 
-class Api(
+class KtorApi(
     private val apiAddress: String,
     val httpClient: HttpClient,
 ) {
@@ -26,7 +28,7 @@ class Api(
         }
         log("Request(id: $reqId) finished; took ${System.currentTimeMillis() - startedAt}; status: ${response.status}")
         return when (response.status) {
-            HttpStatusCode.OK -> response.body()
+            HttpStatusCode.Companion.OK -> response.body()
             else -> null
         }
     }

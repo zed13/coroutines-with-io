@@ -1,9 +1,11 @@
-package org.example
+package org.example.ktor
 
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import org.example.TestStats
+import org.example.log
 import java.util.concurrent.atomic.AtomicLong
 
 suspend fun ParallelRequestTest(
@@ -19,7 +21,7 @@ suspend fun ParallelRequestTest(
 
     coroutineScope {
         val dispatcher = dispatcherFactory()
-        val api = Api(
+        val api = KtorApi(
             apiAddress = "http://localhost:8080",
             httpClient = clientFactory(),
         )

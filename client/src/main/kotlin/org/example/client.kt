@@ -7,13 +7,13 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import okhttp3.ConnectionPool
 import okhttp3.Dispatcher
-import java.util.concurrent.ExecutorService
+import org.example.ktor.ParallelRequestTest
+import org.example.retrofit.RetrofitApiTest
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 fun newOkHttpClient(): HttpClient {
     return HttpClient(OkHttp) {
@@ -68,9 +68,15 @@ fun main(args: Array<String>) {
             dispatcherFactory = { Dispatchers.IO.limitedParallelism(2) },
         )
 
+        println("\n\n\nStart Retrofit test\n")
+        val retrofitTestResult = RetrofitApiTest(
+            dispatcherFactory = { Dispatchers.IO.limitedParallelism(1) }
+        )
+
         println("\n=================================")
         println(cioTestResult.format("CIO"))
         println(okHttpTestResult.format("OkHttp"))
+        println(retrofitTestResult.format("Retrofit"))
     }
 }
 
