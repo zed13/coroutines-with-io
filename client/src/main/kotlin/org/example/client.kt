@@ -2,81 +2,82 @@
 
 package org.example
 
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
-import okhttp3.Dispatcher
-import org.example.ktor.ParallelRequestTest
-import org.example.retrofit.RetrofitApiTest
-import java.util.concurrent.Executors
+import org.example.ktor.Ktor
+import org.example.ktor.dedicatedThreads
+import org.example.ktor.singleThread
+import java.io.File
 
-fun newOkHttpClient(): HttpClient {
-    return HttpClient(OkHttp) {
-        engine {
-            config {
-//                connectionPool(ConnectionPool(
-//                    maxIdleConnections = 100,
-//                    keepAliveDuration = 5,
-//                    timeUnit = TimeUnit.MINUTES,
-//                ))
-                dispatcher(Dispatcher(Executors.newCachedThreadPool()).apply {
-                    maxRequests = 100
-                    maxRequestsPerHost = 100
-                })
-            }
+val reportsDir = File("reports")
+
+fun main(args: Array<String>) = runBlocking {
+    val testEnv = TestEnv.Default
+    val testParams = TestParams.Default
+
+    when {
+        reportsDir.exists() -> {
+            reportsDir.deleteRecursively()
+            reportsDir.mkdirs()
         }
-        install(ContentNegotiation) {
-            json(newJsonConfiguration())
-        }
+
+        else -> reportsDir.mkdirs()
     }
+
+    val tests = listOf(
+        // -- Ktor cio tests
+        Ktor.Cio.singleThread(testEnv, testParams),
+        Ktor.Cio.dedicatedThreads(testEnv, testParams, clientThreadCount = 1, callsThreadCount = 1),
+        Ktor.Cio.dedicatedThreads(testEnv, testParams, clientThreadCount = 10, callsThreadCount = 1),
+        Ktor.Cio.dedicatedThreads(testEnv, testParams, clientThreadCount = 1, callsThreadCount = 10),
+        Ktor.Cio.dedicatedThreads(testEnv, testParams, clientThreadCount = 5, callsThreadCount = 5),
+        // -- Ktor OkHttpTests
+        Ktor.OkHttp.singleThread(testEnv, testParams.copy(callsCount = 20)), // too long execution for 100 calls
+        Ktor.OkHttp.dedicatedThreads(testEnv, testParams.copy(callsCount = 20), clientThreads = 1, callerThreads = 1),
+        Ktor.OkHttp.dedicatedThreads(testEnv, testParams.copy(callsCount = 20), clientThreads = 10, callerThreads = 1),
+        Ktor.OkHttp.dedicatedThreads(testEnv, testParams.copy(callsCount = 20), clientThreads = 1, callerThreads = 10),
+        Ktor.OkHttp.dedicatedThreads(testEnv, testParams.copy(callsCount = 20), clientThreads = 5, callerThreads = 5),
+    )
+
+    val testResults = tests.map { test ->
+        val result = test.launch()
+        test.dispose()
+        result
+    }
+
+    println("-".repeat(80))
+    println("-- REPORT " + "-".repeat(70))
+    println("-".repeat(80))
+
+    testResults.forEachIndexed { index, resultStats ->
+        println()
+        println("-".repeat(80))
+        val report = resultStats.createReport()
+        print(report)
+        File(reportsDir, "report#$index.txt").writeText(resultStats.createReport())
+        CsvExporter.exportCallsData(File(reportsDir, "report#$index.csv"), resultStats.callsStats)
+    }
+
 }
 
-fun newCioClient(): HttpClient {
-    return HttpClient(CIO) {
-        install(ContentNegotiation) {
-            json(newJsonConfiguration())
-        }
-    }
+private fun TestStats.createReport(): String = buildString {
+    appendLine("${testName}(callsCount: ${callsCount}, responseDelay: ${responseDelay})")
+    appendLine("Overall duration: $testDuration")
+    appendLine("Call execution time [min,max,avg]: $minCallTime, $maxCallTime, $avgCallTime")
+
+    val minWaitTime = callsStats.minOfOrNull { it.waitingTimeMillis }
+    val maxWaitingTime = callsStats.maxOfOrNull { it.waitingTimeMillis }
+    val avgWaitingTime = callsStats.sumOf { it.waitingTimeMillis } / callsStats.size
+    appendLine("Waiting time [min,max,avg]: $minWaitTime, $maxWaitingTime, $avgWaitingTime")
+
+    val minExecutionTime = callsStats.minOfOrNull { it.executionTimeMillis }
+    val maxExecutionTime = callsStats.maxOfOrNull { it.executionTimeMillis }
+    val avgExecutionTime = callsStats.sumOf { it.executionTimeMillis } / callsStats.size
+    appendLine("Execution time [min,max,avg]: $minExecutionTime, $maxExecutionTime, $avgExecutionTime")
+
+    val minTotalTime = callsStats.minOfOrNull { it.totalTimeMillis }
+    val maxTotalTime = callsStats.maxOfOrNull { it.totalTimeMillis }
+    val avgTotalTime = callsStats.sumOf { it.totalTimeMillis } / callsStats.size
+    appendLine("Total time [min,max,avg]: $minTotalTime, $maxTotalTime, $avgTotalTime")
 }
 
-private fun newJsonConfiguration(): Json {
-    return Json {
-        prettyPrint = true
-        isLenient = true
-        ignoreUnknownKeys = true
-        encodeDefaults = true
-        explicitNulls = false
-    }
-}
-
-fun main(args: Array<String>) {
-    runBlocking {
-        println("Start CIO client test\n")
-        val cioTestResult = ParallelRequestTest(
-            clientFactory = ::newCioClient,
-            dispatcherFactory = { Dispatchers.IO },
-        )
-
-        println("\n\n\nStart OkHttp client test\n")
-        val okHttpTestResult = ParallelRequestTest(
-            clientFactory = ::newOkHttpClient,
-            dispatcherFactory = { Dispatchers.IO.limitedParallelism(2) },
-        )
-
-        println("\n\n\nStart Retrofit test\n")
-        val retrofitTestResult = RetrofitApiTest(
-            dispatcherFactory = { Dispatchers.IO.limitedParallelism(1) }
-        )
-
-        println("\n=================================")
-        println(cioTestResult.format("CIO"))
-        println(okHttpTestResult.format("OkHttp"))
-        println(retrofitTestResult.format("Retrofit"))
-    }
-}
 
