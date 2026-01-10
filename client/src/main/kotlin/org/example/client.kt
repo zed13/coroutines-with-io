@@ -45,17 +45,14 @@ fun main(args: Array<String>) = runBlocking {
 
     val okHttpParams = OkHttpParams(maxRequests = 10, maxRequestsPerHost = 10)
     val retrofitTests = listOf(
-//        RetrofitTests.singleThread(testEnv, okHttpTestParams),
-//        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 1, callerThreads = 1),
+        RetrofitTests.singleThread(testEnv, okHttpTestParams),
+        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 1, callerThreads = 1),
         RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 10, callerThreads = 1),
         RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 10, callerThreads = 1, okHttpParams = okHttpParams),
-        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 10, callerThreads = 1, retrofitThreads = 10,
-            okHttpParams = okHttpParams
-        ),
-//        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 1, callerThreads = 10),
-//        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 1, callerThreads = 10, retrofitThreads = 10),
-//        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 5, callerThreads = 5),
-//        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 5, callerThreads = 5, retrofitThreads = 5),
+        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 1, callerThreads = 10),
+        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 1, callerThreads = 10, okHttpParams = okHttpParams),
+        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 5, callerThreads = 5),
+        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 5, callerThreads = 5, retrofitThreads = 5),
     )
 
     val tests = buildList {
