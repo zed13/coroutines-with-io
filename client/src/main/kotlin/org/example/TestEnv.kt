@@ -23,3 +23,15 @@ data class TestParams(
         )
     }
 }
+
+data class OkHttpParams(
+    val maxRequests: Int,
+    val maxRequestsPerHost: Int,
+) {
+    companion object {
+        val Default = OkHttpParams(
+            maxRequests = 5,
+            maxRequestsPerHost = 5,
+        )
+    }
+}

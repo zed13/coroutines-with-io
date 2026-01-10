@@ -6,6 +6,9 @@ import kotlinx.coroutines.runBlocking
 import org.example.ktor.Ktor
 import org.example.ktor.dedicatedThreads
 import org.example.ktor.singleThread
+import org.example.retrofit.RetrofitTests
+import org.example.retrofit.dedicatedThreads
+import org.example.retrofit.singleThread
 import java.io.File
 
 val reportsDir = File("reports")
@@ -13,6 +16,7 @@ val reportsDir = File("reports")
 fun main(args: Array<String>) = runBlocking {
     val testEnv = TestEnv.Default
     val testParams = TestParams.Default
+    val okHttpTestParams = TestParams.Default.copy(callsCount = 20)
 
     when {
         reportsDir.exists() -> {
@@ -23,20 +27,42 @@ fun main(args: Array<String>) = runBlocking {
         else -> reportsDir.mkdirs()
     }
 
-    val tests = listOf(
-        // -- Ktor cio tests
+    val ktorCioTests = listOf(
         Ktor.Cio.singleThread(testEnv, testParams),
         Ktor.Cio.dedicatedThreads(testEnv, testParams, clientThreadCount = 1, callsThreadCount = 1),
         Ktor.Cio.dedicatedThreads(testEnv, testParams, clientThreadCount = 10, callsThreadCount = 1),
         Ktor.Cio.dedicatedThreads(testEnv, testParams, clientThreadCount = 1, callsThreadCount = 10),
         Ktor.Cio.dedicatedThreads(testEnv, testParams, clientThreadCount = 5, callsThreadCount = 5),
-        // -- Ktor OkHttpTests
-        Ktor.OkHttp.singleThread(testEnv, testParams.copy(callsCount = 20)), // too long execution for 100 calls
-        Ktor.OkHttp.dedicatedThreads(testEnv, testParams.copy(callsCount = 20), clientThreads = 1, callerThreads = 1),
-        Ktor.OkHttp.dedicatedThreads(testEnv, testParams.copy(callsCount = 20), clientThreads = 10, callerThreads = 1),
-        Ktor.OkHttp.dedicatedThreads(testEnv, testParams.copy(callsCount = 20), clientThreads = 1, callerThreads = 10),
-        Ktor.OkHttp.dedicatedThreads(testEnv, testParams.copy(callsCount = 20), clientThreads = 5, callerThreads = 5),
     )
+
+    val ktorOkHttpTests = listOf(
+        Ktor.OkHttp.singleThread(testEnv, okHttpTestParams),
+        Ktor.OkHttp.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 1, callerThreads = 1),
+        Ktor.OkHttp.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 10, callerThreads = 1),
+        Ktor.OkHttp.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 1, callerThreads = 10),
+        Ktor.OkHttp.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 5, callerThreads = 5),
+    )
+
+    val okHttpParams = OkHttpParams(maxRequests = 10, maxRequestsPerHost = 10)
+    val retrofitTests = listOf(
+//        RetrofitTests.singleThread(testEnv, okHttpTestParams),
+//        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 1, callerThreads = 1),
+        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 10, callerThreads = 1),
+        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 10, callerThreads = 1, okHttpParams = okHttpParams),
+        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 10, callerThreads = 1, retrofitThreads = 10,
+            okHttpParams = okHttpParams
+        ),
+//        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 1, callerThreads = 10),
+//        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 1, callerThreads = 10, retrofitThreads = 10),
+//        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 5, callerThreads = 5),
+//        RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 5, callerThreads = 5, retrofitThreads = 5),
+    )
+
+    val tests = buildList {
+        addAll(retrofitTests)
+//        addAll(ktorOkHttpTests)
+//        addAll(ktorCioTests)
+    }
 
     val testResults = tests.map { test ->
         val result = test.launch()

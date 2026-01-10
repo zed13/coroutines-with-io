@@ -25,8 +25,8 @@ interface RetrofitApi {
         ): RetrofitApi {
             return Retrofit.Builder()
                 .baseUrl(baseUrl)
-                .addConverterFactory(Json.Default.asConverterFactory("application/json".toMediaType()))
-                .config()
+                .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+                .apply { config() }
                 .build()
                 .create(RetrofitApi::class.java)
         }
