@@ -46,6 +46,8 @@ fun main(args: Array<String>) = runBlocking {
     val okHttpParams = OkHttpParams(maxRequests = 10, maxRequestsPerHost = 10)
     val retrofitTests = listOf(
         RetrofitTests.singleThread(testEnv, okHttpTestParams),
+        RetrofitTests.singleThread(testEnv, okHttpTestParams, OkHttpParams(1, 1,)),
+        RetrofitTests.singleThread(testEnv, okHttpTestParams, OkHttpParams(10, 10,)),
         RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 1, callerThreads = 1),
         RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 10, callerThreads = 1),
         RetrofitTests.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 10, callerThreads = 1, okHttpParams = okHttpParams),
