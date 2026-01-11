@@ -1,4 +1,4 @@
-package org.example.retrofit
+package test.io.client.retrofit
 
 import retrofit2.Retrofit
 

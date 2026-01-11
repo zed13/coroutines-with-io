@@ -1,4 +1,4 @@
-package org.example.ktor
+package test.io.client.ktor
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -6,9 +6,8 @@ import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.parameter
 import io.ktor.http.HttpStatusCode
-import org.example.DateTime
-import org.example.Logger
-import org.example.log
+import test.io.client.DateTime
+import test.io.client.Logger
 import java.util.UUID
 
 class KtorApi(

@@ -1,6 +1,6 @@
 @file:Suppress("FunctionName", "UnusedReceiverParameter")
 
-package org.example.ktor
+package test.io.client.ktor
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -10,12 +10,12 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import okhttp3.Dispatcher
-import org.example.LoadTest
-import org.example.Logger
-import org.example.TestEnv
-import org.example.TestParams
-import org.example.newJsonConfiguration
-import org.example.TestableCaller
+import test.io.client.LoadTest
+import test.io.client.Logger
+import test.io.client.TestEnv
+import test.io.client.TestParams
+import test.io.client.newJsonConfiguration
+import test.io.client.TestableCaller
 import java.util.concurrent.Executors
 
 

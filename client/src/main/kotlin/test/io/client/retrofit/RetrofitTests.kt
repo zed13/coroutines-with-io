@@ -1,15 +1,15 @@
-package org.example.retrofit
+package test.io.client.retrofit
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
-import org.example.LoadTest
-import org.example.Logger
-import org.example.OkHttpParams
-import org.example.TestEnv
-import org.example.TestParams
-import org.example.TestableCaller
+import test.io.client.LoadTest
+import test.io.client.Logger
+import test.io.client.OkHttpParams
+import test.io.client.TestEnv
+import test.io.client.TestParams
+import test.io.client.TestableCaller
 import retrofit2.Retrofit
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors

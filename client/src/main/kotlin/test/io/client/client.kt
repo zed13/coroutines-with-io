@@ -1,14 +1,14 @@
 @file:JvmName("Client")
 
-package org.example
+package test.io.client
 
 import kotlinx.coroutines.runBlocking
-import org.example.ktor.Ktor
-import org.example.ktor.dedicatedThreads
-import org.example.ktor.singleThread
-import org.example.retrofit.RetrofitTests
-import org.example.retrofit.dedicatedThreads
-import org.example.retrofit.singleThread
+import test.io.client.ktor.Ktor
+import test.io.client.ktor.dedicatedThreads
+import test.io.client.ktor.singleThread
+import test.io.client.retrofit.RetrofitTests
+import test.io.client.retrofit.dedicatedThreads
+import test.io.client.retrofit.singleThread
 import java.io.File
 
 val reportsDir = File("reports")

@@ -1,8 +1,8 @@
-package org.example.retrofit
+package test.io.client.retrofit
 
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
-import org.example.DateTime
+import test.io.client.DateTime
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.http.GET

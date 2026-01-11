@@ -1,4 +1,4 @@
-package org.example
+package test.io.client
 
 import kotlinx.serialization.json.Json
 
