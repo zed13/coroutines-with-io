@@ -10,6 +10,7 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Query
+import test.io.client.TestEnv
 import java.util.UUID
 
 interface RetrofitApi {
@@ -21,6 +22,10 @@ interface RetrofitApi {
     ): DateTime?
 
     companion object {
+
+        fun create(testEnv: TestEnv, config: RetrofitConfig): RetrofitApi {
+            return create(testEnv.endpointUrl, testEnv.port, config)
+        }
         fun create(
             baseUrl: String,
             port: Int,

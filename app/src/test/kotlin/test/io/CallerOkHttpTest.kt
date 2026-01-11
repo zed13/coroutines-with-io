@@ -8,6 +8,7 @@ import test.io.client.*
 import test.io.client.retrofit.Dispatcher
 import test.io.client.retrofit.RetrofitApi
 import test.io.client.retrofit.client
+import test.io.runner.createReport
 import test.io.server.withTestServer
 import java.util.concurrent.Executors
 
@@ -24,10 +25,7 @@ class CallerOkHttpTest {
             val clientExecutor = Executors.newCachedThreadPool()
             val callerDispatcher = Dispatchers.IO.limitedParallelism(callerThreads)
 
-            val api = RetrofitApi.create(
-                baseUrl = testEnv.endpointUrl,
-                port = testEnv.port
-            ) {
+            val api = RetrofitApi.create(testEnv) {
                 client {
                     dispatcher(Dispatcher(clientExecutor, okHttpParams))
                 }
@@ -50,10 +48,8 @@ class CallerOkHttpTest {
             val result = loadTest.launch()
             loadTest.dispose()
 
-            println(
-                "✓ Test passed for $callerThreads caller threads: " +
-                        "avg=${result.avgCallTime}ms, min=${result.minCallTime}ms, max=${result.maxCallTime}ms"
-            )
+            println("✓ Test passed for $callerThreads caller threads: ")
+            println(result.createReport())
         }
     }
 }
