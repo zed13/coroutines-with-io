@@ -1,8 +1,12 @@
 @file:JvmName("Client")
 
-package test.io.client
+package test.io.runner
 
 import kotlinx.coroutines.runBlocking
+import test.io.client.OkHttpParams
+import test.io.client.TestEnv
+import test.io.client.TestParams
+import test.io.client.TestStats
 import test.io.client.ktor.Ktor
 import test.io.client.ktor.dedicatedThreads
 import test.io.client.ktor.singleThread
@@ -27,7 +31,7 @@ fun main(args: Array<String>) = runBlocking {
         else -> reportsDir.mkdirs()
     }
 
-    val ktorCioTests = listOf(
+    listOf(
         Ktor.Cio.singleThread(testEnv, testParams),
         Ktor.Cio.dedicatedThreads(testEnv, testParams, clientThreadCount = 1, callsThreadCount = 1),
         Ktor.Cio.dedicatedThreads(testEnv, testParams, clientThreadCount = 10, callsThreadCount = 1),
@@ -35,7 +39,7 @@ fun main(args: Array<String>) = runBlocking {
         Ktor.Cio.dedicatedThreads(testEnv, testParams, clientThreadCount = 5, callsThreadCount = 5),
     )
 
-    val ktorOkHttpTests = listOf(
+    listOf(
         Ktor.OkHttp.singleThread(testEnv, okHttpTestParams),
         Ktor.OkHttp.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 1, callerThreads = 1),
         Ktor.OkHttp.dedicatedThreads(testEnv, okHttpTestParams, clientThreads = 10, callerThreads = 1),
