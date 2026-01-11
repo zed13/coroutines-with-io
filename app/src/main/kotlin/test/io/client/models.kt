@@ -71,7 +71,7 @@ data class OkHttpParams(
 ) {
     companion object {
         val Default = OkHttpParams(
-            maxRequests = 5,
+            maxRequests = 64,
             maxRequestsPerHost = 5,
         )
     }

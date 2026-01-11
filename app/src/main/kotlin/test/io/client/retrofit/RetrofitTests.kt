@@ -36,6 +36,16 @@ fun Dispatcher(executor: ExecutorService, params: OkHttpParams?): Dispatcher {
         }
 }
 
+fun Dispatcher(params: OkHttpParams?): Dispatcher {
+    return Dispatcher()
+        .also {
+            if (params != null) {
+                it.maxRequests = params.maxRequests
+                it.maxRequestsPerHost = params.maxRequestsPerHost
+            }
+        }
+}
+
 object RetrofitTests
 
 fun RetrofitTests.singleThread(

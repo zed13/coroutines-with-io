@@ -2,28 +2,21 @@
 
 package test.io.server
 
-import io.ktor.client.plugins.logging.Logging
-import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.kotlinx.json.json
-import io.ktor.server.application.install
-import io.ktor.server.engine.EmbeddedServer
-import io.ktor.server.engine.EngineConnectorBuilder
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.jetty.jakarta.Jetty
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.request.header
-import io.ktor.server.response.respond
-import io.ktor.server.response.respondText
-import io.ktor.server.routing.RoutingRoot
-import io.ktor.server.routing.get
-import io.ktor.server.routing.routing
-import io.ktor.util.logging.Logger
-import io.ktor.util.reflect.TypeInfo
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.jetty.jakarta.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.util.reflect.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import test.io.client.log
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.reflect.typeOf
 import kotlin.time.Duration.Companion.seconds
 
@@ -80,11 +73,14 @@ fun ServerLogger(logging: Boolean = false): ServerLogger {
     return { if (logging) serverLog(it) }
 }
 
+private val ServerPort = AtomicInteger(8080)
+
 fun withTestServer(logging: Boolean = false, block: suspend () -> Unit) = runBlocking {
     val logger = ServerLogger(logging)
     val server = newServer(logger)
     try {
         server.start(wait = false)
+        delay(1000) // Wait for server to start and bind to port
         serverLog("Server started!")
     } catch (e: Exception) {
         serverLog("Failed to start server: ${e.message}")

@@ -12,6 +12,7 @@ dependencies {
     // Testing
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation(libs.junit.jupiter.engine)
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.12.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // Ktor Server

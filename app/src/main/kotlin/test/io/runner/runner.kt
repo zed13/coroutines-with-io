@@ -2,6 +2,7 @@
 
 package test.io.runner
 
+import test.io.client.LoadTest
 import test.io.client.OkHttpParams
 import test.io.client.TestEnv
 import test.io.client.TestParams
@@ -48,7 +49,7 @@ fun main(args: Array<String>) = withTestServer(logging = true) {
     )
 
     val okHttpParams = OkHttpParams(maxRequests = 10, maxRequestsPerHost = 10)
-    val retrofitTests = listOf(
+    val retrofitTests = listOf<LoadTest>(
         RetrofitTests.singleThread(testEnv, okHttpTestParams),
         RetrofitTests.singleThread(testEnv, okHttpTestParams, OkHttpParams(1, 1,)),
         RetrofitTests.singleThread(testEnv, okHttpTestParams, OkHttpParams(10, 10,)),
