@@ -43,11 +43,13 @@ data class CallData(
 
 data class TestEnv(
     val endpointUrl: String,
-    val logging: Boolean,
+    val port: Int,
+    val logging: Boolean, // TODO: Move to another entity
 ) {
     companion object {
         val Default = TestEnv(
             endpointUrl = BASE_URL,
+            port = 8080,
             logging = true,
         )
     }

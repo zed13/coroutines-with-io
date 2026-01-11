@@ -58,7 +58,7 @@ fun RetrofitTests.singleThread(
     val executor = Executors.newSingleThreadExecutor()
     val callerDispatcher = executor.asCoroutineDispatcher()
 
-    val api = RetrofitApi.create(testEnv.endpointUrl) {
+    val api = RetrofitApi.create(testEnv.endpointUrl, 8080) {
         client {
             dispatcher(Dispatcher(executor, okHttpParams))
         }
@@ -95,7 +95,7 @@ fun RetrofitTests.dedicatedThreads(
     val retrofitExecutor = Executors.newFixedThreadPool(retrofitThreads)
     val callerDispatcher = Dispatchers.IO.limitedParallelism(callerThreads)
 
-    val api = RetrofitApi.create(testEnv.endpointUrl) {
+    val api = RetrofitApi.create(testEnv.endpointUrl, 8080) {
         client {
             dispatcher(Dispatcher(clientExecutor, okHttpParams))
         }

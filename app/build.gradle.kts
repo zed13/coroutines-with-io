@@ -10,10 +10,10 @@ repositories {
 
 dependencies {
     // Testing
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation(libs.kotlin.test)
     testImplementation(libs.junit.jupiter.engine)
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.12.1")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation(libs.junit.jupiter.params)
+    testRuntimeOnly(libs.junit.platform.launcher)
 
     // Ktor Server
     implementation(libs.ktor.server.core)
@@ -32,11 +32,11 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     // SLF4J no-op implementation (silences all framework logs)
-    implementation("org.slf4j:slf4j-nop:2.0.9")
+    implementation(libs.slf4j.nop)
 
     // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:3.0.0")
-    implementation("com.squareup.retrofit2:converter-kotlinx-serialization:3.0.0")
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.kotlinx.serialization)
 }
 
 java {

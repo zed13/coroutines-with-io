@@ -15,18 +15,19 @@ import io.ktor.util.reflect.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import test.io.client.TestEnv
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.reflect.typeOf
 import kotlin.time.Duration.Companion.seconds
 
-fun newServer(logger: ServerLogger): EmbeddedServer<*, *> {
+fun newServer(logger: ServerLogger, serverPort: Int): EmbeddedServer<*, *> {
     return embeddedServer(
         factory = Jetty,
         configure = {
             connectors.add(EngineConnectorBuilder().apply {
                 host = "127.0.0.1"
-                port = 8080
+                port = serverPort
             })
             connectionGroupSize = 2
             workerGroupSize = 5
@@ -75,19 +76,25 @@ fun ServerLogger(logging: Boolean = false): ServerLogger {
 
 private val ServerPort = AtomicInteger(8080)
 
-fun withTestServer(logging: Boolean = false, block: suspend () -> Unit) = runBlocking {
+fun withTestServer(logging: Boolean = false, block: suspend (TestEnv) -> Unit) = runBlocking {
     val logger = ServerLogger(logging)
-    val server = newServer(logger)
+    val port = ServerPort.getAndIncrement()
+    val server = newServer(
+        logger = logger,
+        serverPort = port,
+    )
     try {
         server.start(wait = false)
-        delay(1000) // Wait for server to start and bind to port
+        delay(1000)
         serverLog("Server started!")
     } catch (e: Exception) {
         serverLog("Failed to start server: ${e.message}")
         throw e
     }
     try {
-        block()
+        block(
+            TestEnv.Default.copy(port = port)
+        )
     } finally {
         server.stop(100, 5000, TimeUnit.MILLISECONDS)
         serverLog("Server stopped!")
