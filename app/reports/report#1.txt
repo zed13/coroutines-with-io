@@ -1,0 +1,6 @@
+Retrofit.singleThread(callsCount: 20, responseDelay: 1)
+Overall duration: 20124
+Call execution time [min,max,avg]: 1026, 20120, 10573
+Waiting time [min,max,avg]: 0, 3, 1
+Execution time [min,max,avg]: 1026, 20124, 10575
+Total time [min,max,avg]: 1026, 20121, 10573

@@ -1,0 +1,6 @@
+Retrofit.dedicatedThreads(okhttp: 1, retrofit: 1, caller: 10)(callsCount: 20, responseDelay: 1)
+Overall duration: 20075
+Call execution time [min,max,avg]: 1006, 20072, 10539
+Waiting time [min,max,avg]: 0, 3, 1
+Execution time [min,max,avg]: 1007, 20075, 10541
+Total time [min,max,avg]: 1006, 20072, 10540

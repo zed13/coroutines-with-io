@@ -20,12 +20,21 @@ dependencies {
     implementation(libs.ktor.server.content.negotiation)
 //    implementation(libs.ktor.server.call.logging)
 
+    // Ktor Client
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.logging)
+
     // Serialization & Logging
     implementation(libs.ktor.serialization.json)
     implementation(libs.kotlinx.serialization.json)
-//    implementation(libs.logback.classic)
+    implementation(libs.logback.classic)
 
+    // Retrofit
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
+    implementation("com.squareup.retrofit2:converter-kotlinx-serialization:3.0.0")
 }
 
 java {
@@ -35,7 +44,15 @@ java {
 }
 
 application {
-    mainClass = "org.example.AppKt"
+    mainClass = "test.io.server.AppKt"
+}
+
+tasks.register<JavaExec>("runClient") {
+    group = "application"
+    description = "Run the client test suite"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("test.io.client.Client")
+    standardInput = System.`in`
 }
 
 tasks.named<Test>("test") {
