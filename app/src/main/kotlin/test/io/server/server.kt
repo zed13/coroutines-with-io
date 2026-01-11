@@ -1,4 +1,4 @@
-package org.example
+package test.io.server
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
@@ -17,7 +17,6 @@ import io.ktor.server.routing.routing
 import io.ktor.util.reflect.TypeInfo
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
-import kotlin.math.min
 import kotlin.reflect.typeOf
 import kotlin.time.Duration.Companion.seconds
 

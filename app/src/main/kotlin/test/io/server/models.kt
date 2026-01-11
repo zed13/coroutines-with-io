@@ -1,4 +1,4 @@
-package org.example
+package test.io.server
 
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
