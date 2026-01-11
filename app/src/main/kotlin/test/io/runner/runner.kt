@@ -2,7 +2,6 @@
 
 package test.io.runner
 
-import kotlinx.coroutines.runBlocking
 import test.io.client.OkHttpParams
 import test.io.client.TestEnv
 import test.io.client.TestParams
@@ -13,11 +12,12 @@ import test.io.client.ktor.singleThread
 import test.io.client.retrofit.RetrofitTests
 import test.io.client.retrofit.dedicatedThreads
 import test.io.client.retrofit.singleThread
+import test.io.server.withTestServer
 import java.io.File
 
 val reportsDir = File("reports")
 
-fun main(args: Array<String>) = runBlocking {
+fun main(args: Array<String>) = withTestServer(logging = true) {
     val testEnv = TestEnv.Default
     val testParams = TestParams.Default
     val okHttpTestParams = TestParams.Default.copy(callsCount = 20)
@@ -85,7 +85,6 @@ fun main(args: Array<String>) = runBlocking {
         File(reportsDir, "report#$index.txt").writeText(resultStats.createReport())
         CsvExporter.exportCallsData(File(reportsDir, "report#$index.csv"), resultStats.callsStats)
     }
-
 }
 
 private fun TestStats.createReport(): String = buildString {

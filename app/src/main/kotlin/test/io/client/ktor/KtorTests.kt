@@ -11,7 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import okhttp3.Dispatcher
 import test.io.client.LoadTest
-import test.io.client.Logger
+import test.io.client.ClientLogger
 import test.io.client.TestEnv
 import test.io.client.TestParams
 import test.io.client.newJsonConfiguration
@@ -30,7 +30,7 @@ fun Ktor.Cio.singleThread(
     testEnv: TestEnv,
     testParams: TestParams,
 ): LoadTest {
-    val logger = Logger(testEnv.logging)
+    val logger = ClientLogger(testEnv.logging)
 
     val dispatcher = Dispatchers.IO.limitedParallelism(1)
 
@@ -64,7 +64,7 @@ fun Ktor.Cio.dedicatedThreads(
     clientThreadCount: Int,
     callsThreadCount: Int,
 ): LoadTest {
-    val logger = Logger(testEnv.logging)
+    val logger = ClientLogger(testEnv.logging)
     val clientDispatcher = Dispatchers.IO.limitedParallelism(clientThreadCount)
     val callDispatcher = Dispatchers.IO.limitedParallelism(callsThreadCount)
     val httpClient = HttpClient(CIO) {
@@ -95,7 +95,7 @@ fun Ktor.OkHttp.singleThread(
     testEnv: TestEnv,
     testParams: TestParams,
 ): LoadTest {
-    val logger = Logger(testEnv.logging)
+    val logger = ClientLogger(testEnv.logging)
 
     val executor = Executors.newSingleThreadExecutor()
     val dispatcher = executor.asCoroutineDispatcher()
@@ -135,7 +135,7 @@ fun Ktor.OkHttp.dedicatedThreads(
     clientThreads: Int,
     callerThreads: Int,
 ): LoadTest {
-    val logger = Logger(testEnv.logging)
+    val logger = ClientLogger(testEnv.logging)
 
     val clientExecutor = Executors.newFixedThreadPool(clientThreads)
     val callerDispatcher = Dispatchers.IO.limitedParallelism(callerThreads)

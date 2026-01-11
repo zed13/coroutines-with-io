@@ -10,7 +10,7 @@ class LoadTest(
     val testName: String,
     val callerFactory: () -> TestableCaller<Int, Unit>,
     val dispatcherFactory: CoroutineDispatchersFactory,
-    val logger: Logger,
+    val logger: ClientLogger,
     val callDelay: Int,
     val callsCount: Int,
     val onDisposed: (suspend () -> Unit)? = null,

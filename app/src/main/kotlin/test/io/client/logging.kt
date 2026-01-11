@@ -1,17 +1,15 @@
+@file:Suppress("FunctionName")
+
 package test.io.client
 
 import java.time.LocalTime
 
-typealias Logger = (String) -> Unit
+typealias ClientLogger = (String) -> Unit
 
-fun Logger(isLoggingEnabled: Boolean = true): Logger {
-    return { message ->
-        if (isLoggingEnabled) {
-            log(message)
-        }
-    }
+fun ClientLogger(isLoggingEnabled: Boolean = true): ClientLogger {
+    return { if (isLoggingEnabled) log(it) }
 }
 
 fun log(message: String) {
-    println("${Thread.currentThread().name}@${LocalTime.now()} --> $message")
+    println("[Client] ${Thread.currentThread().name}@${LocalTime.now()} --> $message")
 }

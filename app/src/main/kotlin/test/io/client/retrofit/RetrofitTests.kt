@@ -1,3 +1,5 @@
+@file:Suppress("UnusedReceiverParameter")
+
 package test.io.client.retrofit
 
 import kotlinx.coroutines.Dispatchers
@@ -5,7 +7,7 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import test.io.client.LoadTest
-import test.io.client.Logger
+import test.io.client.ClientLogger
 import test.io.client.OkHttpParams
 import test.io.client.TestEnv
 import test.io.client.TestParams
@@ -41,7 +43,7 @@ fun RetrofitTests.singleThread(
     testParams: TestParams,
     okHttpParams: OkHttpParams? = null,
 ): LoadTest {
-    val logger = Logger(testEnv.logging)
+    val logger = ClientLogger(testEnv.logging)
 
     val executor = Executors.newSingleThreadExecutor()
     val callerDispatcher = executor.asCoroutineDispatcher()
@@ -77,7 +79,7 @@ fun RetrofitTests.dedicatedThreads(
     okHttpParams: OkHttpParams? = null,
 
     ): LoadTest {
-    val logger = Logger(testEnv.logging)
+    val logger = ClientLogger(testEnv.logging)
 
     val clientExecutor = Executors.newFixedThreadPool(clientThreads)
     val retrofitExecutor = Executors.newFixedThreadPool(retrofitThreads)

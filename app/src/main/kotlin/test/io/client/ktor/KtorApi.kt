@@ -7,13 +7,13 @@ import io.ktor.client.request.headers
 import io.ktor.client.request.parameter
 import io.ktor.http.HttpStatusCode
 import test.io.client.DateTime
-import test.io.client.Logger
+import test.io.client.ClientLogger
 import java.util.UUID
 
 class KtorApi(
     private val apiAddress: String,
     private val httpClient: HttpClient,
-    private val logger: Logger,
+    private val logger: ClientLogger,
 ) {
     suspend fun getDatetime(delaySeconds: Int? = null): DateTime? {
         val reqId = UUID.randomUUID()

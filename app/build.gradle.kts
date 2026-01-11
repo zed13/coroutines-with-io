@@ -18,7 +18,6 @@ dependencies {
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.jetty)
     implementation(libs.ktor.server.content.negotiation)
-//    implementation(libs.ktor.server.call.logging)
 
     // Ktor Client
     implementation(libs.ktor.client.core)
@@ -27,10 +26,12 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.client.logging)
 
-    // Serialization & Logging
+    // Serialization
     implementation(libs.ktor.serialization.json)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.logback.classic)
+
+    // SLF4J no-op implementation (silences all framework logs)
+    implementation("org.slf4j:slf4j-nop:2.0.9")
 
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
@@ -44,7 +45,7 @@ java {
 }
 
 application {
-    mainClass = "test.io.server.AppKt"
+    mainClass = "test.io.runner.RunnerKt"
 }
 
 tasks.register<JavaExec>("runClient") {
