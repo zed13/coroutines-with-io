@@ -80,10 +80,10 @@ fun main(args: Array<String>) = withTestServer(logging = true) {
     testResults.forEachIndexed { index, resultStats ->
         println()
         println("-".repeat(80))
-        val report = resultStats.createReport()
+        val report = createReport(resultStats)
         print(report)
-        File(reportsDir, "report#$index.txt").writeText(resultStats.createReport())
-        CsvExporter.exportCallsData(File(reportsDir, "report#$index.csv"), resultStats.callsStats)
+        File(reportsDir, "report#$index.txt").writeText(Reports.createReport(resultStats))
+        Reports.exportCallsData(File(reportsDir, "report#$index.csv"), resultStats.callsStats)
     }
 }
 

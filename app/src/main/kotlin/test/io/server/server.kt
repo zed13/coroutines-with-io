@@ -85,7 +85,6 @@ fun withTestServer(logging: Boolean = false, block: suspend (TestEnv) -> Unit) =
     )
     try {
         server.start(wait = false)
-        delay(1000)
         serverLog("Server started!")
     } catch (e: Exception) {
         serverLog("Failed to start server: ${e.message}")
